@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Orders Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+</head>
+<body class="d-flex">
+
+<!-- Sidebar -->
+<nav class="sidebar bg-dark text-white d-flex flex-column justify-content-between p-3"
+     style="width: 220px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1030;">
+
+  <div class="text-center mb-4">
+    <a href="{% url 'front_page' %}" class="text-white text-decoration-none">
+      <img src="{% static 'images/logo1.png' %}" alt="Logo" width="50" height="50" class="mb-2">
+      <h5 class="mb-0">Home</h5>
+    </a>
+  </div>
+
+  <!-- Sidebar Buttons -->
+  <div>
+    <a href="{% url 'admin_dashboard' %}"
+      class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+      User's Order
+    </a>
+
+    <a href="{% url 'admin_all_orders_overview' %}"
+      class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_all_orders_overview' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+      Overview
+    </a>
+
+    <a href="{% url 'admin_summary' %}"
+      class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_summary' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+      Summary
+    </a>
+
+    <a href="{% url 'admin_machine_env' %}"
+      class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_machine_env' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+      Factory Environment
+    </a>
+
+    <a href="{% url 'admin_fjsp1' %}"
+      class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_fjsp1' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+      Flexible Scheduling
+    </a>
+  
+
+
+  </div>
+
+  <div class="mt-auto">
+    <a href="/admin/" class="btn btn-outline-light w-100 mt-4">Producer Administration</a>
+    <a href="{% url 'logout' %}" class="btn btn-outline-light w-100 mt-3 mb-2">Logout</a>
+  </div>
+</nav>
+
+
+<!-- Main Content -->
+<div class="flex-grow-1 p-4 bg-light" style="margin-left: 220px;">
+
+  <div class="admin-title-full text-center py-4 mb-4" style="background-color: #0d6efd; color: white; border-radius: 6px;">
+    <h2 class="m-0">All Orders Overview</h2>
+  </div>
+
+  <div class="container">
+    {% if all_orders %}
+    <div class="card p-4 shadow border-0 rounded-4">
+      <h5 class="fw-bold text-success m-0 fs-4 mb-3">📋 All Orders Overview</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+          <thead class="table-light text-center">
+            <tr>
+              <th>#</th>
+              <th>Username</th>
+              <th>Product</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for order in all_orders %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td class="text-capitalize">{{ order.username }}</td>
+              <td class="text-capitalize">{{ order.product }}</td>
+              <td>{{ order.quantity }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+      <p class="text-muted">No orders found.</p>
+    {% endif %}
+  </div>
+</div>
+
+</body>
+</html>

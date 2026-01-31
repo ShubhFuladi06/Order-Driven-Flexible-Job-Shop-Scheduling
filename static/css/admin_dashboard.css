@@ -1,0 +1,85 @@
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+.sidebar {
+    background-color: #343a40;
+}
+
+.sidebar .nav-link.active {
+    background-color: #495057;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.admin-title-full {
+    background-color: #0d6efd; /* Bootstrap primary blue */
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.admin-title-full h2 {
+    font-weight: 600;
+    font-size: 1.8rem;
+}
+
+.table th, .table td {
+    vertical-align: middle !important;
+  }
+  
+  .table thead th {
+    background-color: #eaf0fb;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f7faff;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .card h5 img {
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1));
+  }
+  
+
+
+
+
+.factory-env-table thead tr:first-child {
+  background-color: #3e5d96;
+  color: rgb(243, 228, 228);
+}
+
+/* Optional: Style the second header row (Machine Groups) */
+.factory-env-table thead tr:nth-child(2) {
+  background-color: #94bbff;
+  font-weight: 500;
+}
+
+/* Optional: Border, padding and spacing improvements */
+.factory-env-table th, .factory-env-table td {
+  border: 1px solid #1f4264;
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.factory-env-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: rgb(198, 221, 255);
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+
+/* First column (Job names) in table body */
+.factory-env-table tbody td:first-child {
+  background-color: #94bbff;; /* light blue shade */
+  font-weight: bold;
+}
+

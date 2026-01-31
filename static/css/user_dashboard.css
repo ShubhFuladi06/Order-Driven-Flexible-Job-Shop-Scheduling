@@ -1,0 +1,67 @@
+/* Sidebar Styles */
+.sidebar {
+    background-color: #0c1c3b; /* Dark navy blue */
+    color: white;
+  }
+  
+  .sidebar .nav-link {
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sidebar .nav-link.active,
+  .sidebar .nav-link:hover {
+    background-color: #0e5fe5; /* Bright blue on active/hover */
+    color: white;
+  }
+  
+  /* Sidebar Logo Area */
+  .sidebar img {
+    border-radius: 10px;
+  }
+  
+  .sidebar h5 {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+  }
+  
+  /* Header Styles */
+  .bg-primary {
+    background-color: #0e5fe5 !important;
+  }
+  
+  .bg-primary h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  /* Body Base */
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  /* Main Table */
+  .table td, .table th {
+    vertical-align: middle;
+    text-align: center;
+  }
+  
+  /* Buttons with spacing */
+  button {
+    min-width: 120px;
+  }
+  
+  .bg-primary h4 {
+    margin: 0 auto;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .sidebar .btn {
+    margin-bottom: 1rem;
+  }   

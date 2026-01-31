@@ -1,0 +1,843 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flexible Scheduling</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <style>
+    .main-content,
+    .main-content > *,
+    .card,
+    div[class*="card"] {
+      display: block !important;
+      flex: none !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      margin-bottom: 1.5rem !important;
+    }
+    
+    /* Override Bootstrap flex utilities */
+    .d-flex,
+    .flex-grow-1,
+    [class*="d-flex"] {
+      display: block !important;
+    }
+    
+    .gantt-container {
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      background: white;
+      margin: 20px 0;
+    }
+    .gantt-chart {
+      min-height: 500px;
+    }
+    .task-bar {
+      height: 30px;
+      margin: 5px 0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 12px;
+      padding: 0 8px;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .machine-row {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .machine-label {
+      font-weight: bold;
+      font-size: 14px;
+      width: 60px;
+      text-align: center;
+      background: #e9ecef;
+      padding: 8px 12px;
+      border-radius: 5px;
+      margin-right: 15px;
+      color: #495057;
+      min-width: 60px;
+    }
+    .timeline-container {
+      flex: 1;
+      position: relative;
+      height: 35px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f8f9fa;
+    }
+    .job-colors {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .color-legend {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .color-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+    }
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .summary-value {
+      font-size: 2em;
+      font-weight: bold;
+      color: #0d6efd;
+    }
+    .progress-bar {
+      font-size: 16px !important;
+      font-weight: bold !important;
+      color: white !important;
+    }
+    .progress {
+      height: 40px !important;
+    }
+    .progress .progress-bar {
+      font-size: 20px !important;
+      font-weight: bold !important;
+      line-height: 40px !important;
+    }
+    .machine-info-text {
+      font-size: 16px !important;
+      font-weight: bold !important;
+      color: #343a40 !important;
+      line-height: 1.5 !important;
+    }
+    .machine-utilization-card {
+      min-width: 250px !important;
+      max-width: 250px !important;
+      margin-bottom: 15px !important;
+      flex: 0 0 250px !important;
+    }
+    .machine-progress-bar {
+      width: 220px !important;
+      margin: 0 auto !important;
+    }
+    .machine-group-row {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: flex-start !important;
+      gap: 15px !important;
+      margin-bottom: 25px !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      padding-right: 0px !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    
+    /* Ensure main sections stack vertically */
+    .card {
+      display: block !important;
+      width: 100% !important;
+    }
+    
+    /* Force vertical layout for main content */
+    .main-content {
+      display: block !important;
+      overflow-x: hidden !important;
+      width: calc(100vw - 240px) !important;
+      max-width: calc(100vw - 240px) !important;
+      box-sizing: border-box !important;
+      padding-top: 20px !important;
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+    
+    /* Force vertical layout for all content */
+    .main-content > * {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-bottom: 1rem !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* Ensure machine utilization section is fully visible */
+    .machine-utilization-section {
+      width: 100% !important;
+      overflow: visible !important;
+    }
+    
+    .table {
+      max-width: 100% !important;
+      table-layout: auto !important;
+    }
+    
+    /* Ensure all content fits within viewport */
+    * {
+      box-sizing: border-box !important;
+    }
+    
+    /* Force ALL cards to be positioned away from sidebar */
+    .main-content .card {
+      margin-left: 0 !important;
+      padding-left: 10px !important;
+      max-width: 100% !important;
+      margin-top: 20px !important;
+      clear: both !important;
+      position: relative !important;
+      z-index: 1 !important;
+    }
+    
+    /* Aggressive fix for all table containers */
+    .main-content .table-responsive {
+      margin-left: 0 !important;
+      padding-left: 10px !important;
+      margin-top: 10px !important;
+      position: relative !important;
+      z-index: 2 !important;
+    }
+    .machine-group-title {
+      font-size: 18px !important;
+      font-weight: bold !important;
+      color: #2c3e50 !important;
+      margin-bottom: 15px !important;
+      padding: 10px !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border-radius: 8px !important;
+      text-align: center !important;
+    }
+    .mb-3 {
+      margin-bottom: 0.5rem !important;
+    }
+    .row.mb-3 {
+      margin-bottom: 1rem !important;
+    }
+    
+    .table-responsive {
+      overflow-x: auto !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* Ensure tables fit within container */
+    .table {
+      max-width: 100% !important;
+      table-layout: auto !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    
+    /* Prevent summary cards from overflowing */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Ensure all sections are properly spaced from top */
+    .card.mt-4 {
+      margin-top: 30px !important;
+      position: relative !important;
+      z-index: 1 !important;
+    }
+    
+    /* Special handling for sections that might get hidden */
+    .main-content > .card,
+    .main-content > div[class*="card"] {
+      margin-top: 25px !important;
+      padding-top: 10px !important;
+      clear: both !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+  </style>
+</head>
+<body class="d-flex" style="overflow-x: hidden; max-width: 100vw; box-sizing: border-box;">
+
+<!-- Sidebar -->
+<nav class="sidebar bg-dark text-white d-flex flex-column justify-content-between p-3"
+     style="width: 220px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1030;">
+  <div class="text-center mb-4">
+    <a href="{% url 'front_page' %}" class="text-white text-decoration-none">
+      <img src="{% static 'images/logo1.png' %}" alt="Logo" width="50" height="50" class="mb-2">
+      <h5 class="mb-0">Home</h5>
+    </a>
+  </div>
+
+  <div>
+    <a href="{% url 'admin_dashboard' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}btn-primary active{% else %}btn-outline-primary{% endif %}">User's Order</a>
+    <a href="{% url 'admin_all_orders_overview' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_all_orders_overview' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Overview</a>
+    <a href="{% url 'admin_summary' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_summary' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Summary</a>
+    <a href="{% url 'admin_machine_env' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_machine_env' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Factory Environment</a>
+    <a href="{% url 'admin_fjsp1' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_fjsp1' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Flexible Scheduling</a>
+  </div>
+
+  <div class="mt-auto">
+    <a href="/admin/" class="btn btn-outline-light w-100 mt-4">Producer Administration</a>
+    <a href="{% url 'logout' %}" class="btn btn-outline-light w-100 mt-3 mb-2">Logout</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content p-4 bg-light" style="margin-left: 240px; width: calc(100vw - 240px); max-width: calc(100vw - 240px); display: block !important; flex: none !important; overflow-x: hidden !important; box-sizing: border-box !important;">
+  <div class="admin-title-full text-center py-4 mb-4" style="background-color: #0d6efd; color: white; border-radius: 6px;">
+    <h1 class="m-0">Flexible Job Shop Scheduling</h1>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger">
+      <h5>Error:</h5>
+      <p>{{ error }}</p>
+    </div>
+  {% elif has_data %}
+    <!-- Job Color Legend -->
+    <div class="card p-3 mb-4" style="display: block !important; width: 100% !important; margin-bottom: 2rem !important;">
+      <h5>Job Type Legend</h5>
+      <div class="job-colors">
+        <div class="color-legend">
+          <div class="color-box" style="background-color: #FF6B6B;"></div>
+          <span>Job1 (Pants)</span>
+        </div>
+        <div class="color-legend">
+          <div class="color-box" style="background-color: #4ECDC4;"></div>
+          <span>Job2 (Shirt)</span>
+        </div>
+        <div class="color-legend">
+          <div class="color-box" style="background-color: #45B7D1;"></div>
+          <span>Job3 (Curtain)</span>
+        </div>
+        <div class="color-legend">
+          <div class="color-box" style="background-color: #FFA07A;"></div>
+          <span>Job4 (Towel)</span>
+        </div>
+        <div class="color-legend">
+          <div class="color-box" style="background-color: #98D8C8;"></div>
+          <span>Job5 (T-shirt)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gantt Chart -->
+    <div class="card" style="display: block !important; width: 100% !important; margin-bottom: 2rem !important;">
+      <div class="card-header">
+        <h5 class="mb-0">📊 Production Schedule - Gantt Chart</h5>
+      </div>
+      <div class="card-body">
+        <div class="gantt-container">
+          <div id="gantt-chart" class="gantt-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Machine Utilization Section -->
+    <div class="card mt-4" style="display: block !important; width: 100% !important; margin-bottom: 2rem !important;">
+      <div class="card-header">
+        <h5 class="mb-0">🏭 Machine Utilization</h5>
+      </div>
+      <div class="card-body">
+        <!-- Machine Group 1: Fabric Inspection (M1-M4) -->
+        <div class="machine-group-title">Fabric Inspection Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M1" or machine == "M2" or machine == "M3" or machine == "M4" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Machine Group 2: Cutting (M5-M6) -->
+        <div class="machine-group-title">Cutting Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M5" or machine == "M6" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Machine Group 3: Sewing (M7-M8) -->
+        <div class="machine-group-title">Sewing Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M7" or machine == "M8" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Machine Group 4: Dyeing (M9-M11) -->
+        <div class="machine-group-title">Dyeing Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M9" or machine == "M10" or machine == "M11" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Machine Group 5: Printing (M12-M15) -->
+        <div class="machine-group-title">Printing Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M12" or machine == "M13" or machine == "M14" or machine == "M15" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Machine Group 6: Quality Control (M16-M18) -->
+        <div class="machine-group-title">Quality Control Operations</div>
+        <div class="machine-group-row">
+          {% for machine, util in machine_utilization.items %}
+            {% if machine == "M16" or machine == "M17" or machine == "M18" %}
+              <div class="card h-100 machine-utilization-card">
+                <div class="card-body text-center">
+                  <h6 class="card-title">{{ machine }}</h6>
+                  <div class="progress mb-2 machine-progress-bar">
+                    <div class="progress-bar" role="progressbar" style="width: {{ util.utilization_percent }}%">
+                      {{ util.utilization_percent }}%
+                    </div>
+                  </div>
+                  <div class="machine-info-text">
+                    {{ util.task_count }} tasks<br>
+                    {{ util.total_time }} min working
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Statistics Section -->
+    <div class="card mt-4" style="display: block !important; width: 60% !important; margin: 30px auto 2rem auto !important; clear: both !important; position: relative !important; z-index: 10 !important;">
+      <div class="card-header">
+        <h5 class="mb-0">📈 Job Statistics</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Job Type</th>
+                <th>Tasks Count</th>
+                <th>Total Duration</th>
+                <th>Avg Processing Time</th>
+                <th>Completion Span</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job, stats in job_statistics.items %}
+              <tr>
+                <td><strong>{{ job }}</strong></td>
+                <td>{{ stats.task_count }}</td>
+                <td>{{ stats.total_duration }} min</td>
+                <td>{{ stats.avg_processing_time }} min</td>
+                <td>{{ stats.completion_time }} min</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Completion Times Section -->
+    <div class="card mt-4" style="display: block !important; width: 60% !important; margin: 30px auto 2rem auto !important; clear: both !important; position: relative !important; z-index: 10 !important; box-sizing: border-box !important;">
+      <div class="card-header">
+        <h5 class="mb-0">📦 Order Completion Times</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover table-sm">
+            <thead class="table-dark">
+              <tr>
+                <th style="font-size: 0.85rem;">User</th>
+                <th style="font-size: 0.85rem;">Product</th>
+                <th style="font-size: 0.85rem;">Qty</th>
+                <th style="font-size: 0.85rem;">Time</th>
+                <th style="font-size: 0.85rem;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in schedule_data.order_completion_times %}
+              <tr style="font-size: 0.9rem;">
+                <td>
+                  <strong style="font-size: 0.85rem;">{{ order.user }}</strong>
+                </td>
+                <td>
+                  <span class="badge bg-info" style="font-size: 0.75rem;">{{ order.product }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-secondary" style="font-size: 0.75rem;">{{ order.quantity }}</span>
+                </td>
+                <td style="font-size: 0.85rem;">
+                  <strong>{{ order.completion_time }} min</strong>
+                </td>
+                <td>
+                  {% if order.completion_time <= schedule_data.makespan %}
+                    <span class="badge bg-success" style="font-size: 0.75rem;">✅ Done</span>
+                  {% else %}
+                    <span class="badge bg-warning" style="font-size: 0.75rem;">⏳ Pending</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted" style="font-size: 0.85rem;">
+                  <em>No order completion data available</em>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Order Completion Summary -->
+        <div class="mt-3">
+          <div class="row">
+            <div class="col-4 mb-2">
+              <div class="card bg-light" style="padding: 8px;">
+                <div class="card-body text-center" style="padding: 8px;">
+                  <h6 class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Fastest</h6>
+                  {% if schedule_data.completion_stats %}
+                    <h5 class="text-success" style="font-size: 1.1rem; margin-bottom: 2px;">{{ schedule_data.completion_stats.fastest|floatformat:0 }} min</h5>
+                    {% if schedule_data.order_completion_times %}
+                      <small style="font-size: 0.7rem;">{{ schedule_data.order_completion_times.0.user }}</small>
+                    {% endif %}
+                  {% else %}
+                    <h5 class="text-muted" style="font-size: 1.1rem;">-</h5>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-4 mb-2">
+              <div class="card bg-light" style="padding: 8px;">
+                <div class="card-body text-center" style="padding: 8px;">
+                  <h6 class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Average</h6>
+                  {% if schedule_data.completion_stats %}
+                    <h5 class="text-info" style="font-size: 1.1rem; margin-bottom: 2px;">{{ schedule_data.completion_stats.average|floatformat:0 }} min</h5>
+                  {% else %}
+                    <h5 class="text-muted" style="font-size: 1.1rem;">-</h5>
+                  {% endif %}
+                  <small style="font-size: 0.7rem;">All orders</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-4 mb-2">
+              <div class="card bg-light" style="padding: 8px;">
+                <div class="card-body text-center" style="padding: 8px;">
+                  <h6 class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Latest</h6>
+                  {% if schedule_data.completion_stats %}
+                    <h5 class="text-warning" style="font-size: 1.1rem; margin-bottom: 2px;">{{ schedule_data.completion_stats.slowest|floatformat:0 }} min</h5>
+                    {% if schedule_data.order_completion_times %}
+                      {% with last_order=schedule_data.order_completion_times|last %}
+                        <small style="font-size: 0.7rem;">{{ last_order.user }}</small>
+                      {% endwith %}
+                    {% endif %}
+                  {% else %}
+                    <h5 class="text-muted" style="font-size: 1.1rem;">-</h5>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4" style="display: block !important; width: 60% !important; margin: 30px auto 2rem auto !important; clear: both !important; position: relative !important; z-index: 10 !important;">
+      <div class="card-header">
+        <h5 class="mb-0">📋 Detailed Schedule</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Machine</th>
+                <th>Job Type</th>
+                <th>Order ID</th>
+                <th>Operation</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in schedule_data.tasks %}
+              <tr>
+                <td><span class="badge bg-secondary">{{ task.machine }}</span></td>
+                <td>{{ task.job }}</td>
+                <td class="text-muted small">{{ task.order_id|truncatechars:20 }}</td>
+                <td>Op {{ task.operation }}</td>
+                <td>{{ task.start_time }}</td>
+                <td>{{ task.end_time }}</td>
+                <td>{{ task.duration }} min</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Algorithm Selection -->
+    <div class="card mb-4" style="width: 70% !important; margin: 30px auto 2rem auto !important; clear: both !important; position: relative !important; z-index: 10 !important;">
+      <div class="card-header">
+        <h5 class="mb-0">🧠 Optimization Algorithm Selection</h5>
+      </div>
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="btn-group w-100" role="group">
+              <a href="?algorithm=hybrid" class="btn {% if algorithm_used == 'hybrid' or not algorithm_used %}btn-success{% else %}btn-outline-success{% endif %}">
+                🔀 Hybrid GA-VNS
+              </a>
+              <a href="?algorithm=greedy" class="btn {% if algorithm_used == 'greedy' %}btn-info{% else %}btn-outline-info{% endif %}">
+                ⚡
+              </a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted">
+              {% if algorithm_used == 'hybrid' or not algorithm_used %}
+                <strong>Active:</strong> Genetic Algorithm + Variable Neighborhood Search
+                <br><small>Best quality solutions</small>
+              {% elif algorithm_used == 'greedy' %}
+                <strong>Active:</strong> Scheduling
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-cards" style="width: 60% !important; margin: 30px auto 20px auto !important; clear: both !important; position: relative !important; z-index: 10 !important;">
+      <div class="summary-card">
+        <div class="summary-value">{{ schedule_data.makespan }}</div>
+        <div>Total Makespan (minutes)</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-value">{{ schedule_data.summary.total_tasks }}</div>
+        <div>Total Tasks Scheduled</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-value">{{ schedule_data.summary.total_machines }}</div>
+        <div>Machines Used</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-value">{{ schedule_data.summary.total_orders }}</div>
+        <div>Total Orders</div>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="summary-value" style="color: white;">
+          {% if algorithm_used == 'hybrid' or not algorithm_used %}🔀{% else %}⚡{% endif %}
+        </div>
+        <div>{{ schedule_data.summary.algorithm|default:"Hybrid GA-VNS" }}</div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="alert alert-info text-center">
+      <h5>No Orders to Schedule</h5>
+      <p>No user orders found in the system. Please ensure there are orders to schedule.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  {% if has_data %}
+    renderGanttChart();
+  {% endif %}
+});
+
+function renderGanttChart() {
+  const scheduleData = {{ schedule_data_json }};
+  const ganttContainer = document.getElementById('gantt-chart');
+  
+  // Job colors mapping
+  const jobColors = {
+    'Job1': '#FF6B6B',
+    'Job2': '#4ECDC4', 
+    'Job3': '#45B7D1',
+    'Job4': '#FFA07A',
+    'Job5': '#98D8C8'
+  };
+  
+  // Group tasks by machine
+  const machineGroups = {};
+  scheduleData.tasks.forEach(task => {
+    if (!machineGroups[task.machine]) {
+      machineGroups[task.machine] = [];
+    }
+    machineGroups[task.machine].push(task);
+  });
+  
+  // Sort machines numerically (M1, M2, M3, etc.)
+  const sortedMachines = Object.keys(machineGroups).sort((a, b) => {
+    const numA = parseInt(a.replace('M', ''));
+    const numB = parseInt(b.replace('M', ''));
+    return numA - numB;
+  });
+  
+  // Create Gantt chart HTML
+  let ganttHTML = '';
+  const maxTime = scheduleData.makespan || 100;
+  
+  sortedMachines.forEach(machine => {
+    ganttHTML += `
+      <div class="machine-row">
+        <div class="machine-label">${machine}</div>
+        <div class="timeline-container">
+    `;
+    
+    machineGroups[machine].forEach(task => {
+      const leftPercent = (task.start_time / maxTime) * 100;
+      const widthPercent = (task.duration / maxTime) * 100;
+      const color = jobColors[task.job] || '#6c757d';
+      
+      ganttHTML += `
+        <div class="task-bar" 
+             style="position: absolute; 
+                    left: ${leftPercent}%; 
+                    width: ${widthPercent}%; 
+                    height: 30px;
+                    top: 2px;
+                    background-color: ${color};
+                    border-radius: 3px;
+                    display: flex;
+                    align-items: center;
+                    color: white;
+                    font-size: 11px;
+                    padding: 0 6px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
+             title="${task.job} - Op${task.operation} (${task.start_time}-${task.end_time})">
+          <small style="font-weight: 500;">${task.job} Op${task.operation}</small>
+        </div>
+      `;
+    });
+    
+    ganttHTML += `
+        </div>
+      </div>
+    `;
+  });
+  
+  // Add time scale
+  ganttHTML += `
+    <div class="time-scale" style="margin-left: 75px; margin-top: 15px; position: relative; height: 25px; border-top: 1px solid #ddd; padding-top: 5px;">
+  `;
+  
+  for (let t = 0; t <= maxTime; t += Math.ceil(maxTime / 10)) {
+    const leftPercent = (t / maxTime) * 100;
+    ganttHTML += `
+      <div style="position: absolute; left: ${leftPercent}%; top: 5px; font-size: 11px; color: #666; font-weight: 500;">
+        ${t} min
+      </div>
+    `;
+  }
+  
+  ganttHTML += '</div>';
+  
+  ganttContainer.innerHTML = ganttHTML;
+}
+</script>
+
+</body>
+</html>

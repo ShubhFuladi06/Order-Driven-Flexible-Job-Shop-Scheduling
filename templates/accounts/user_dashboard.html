@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/user_dashboard.css' %}">
+</head>
+<body class="d-flex">
+
+<!-- Sidebar -->
+<nav class="sidebar bg-dark text-white d-flex flex-column justify-content-between p-3"
+     style="width: 220px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1030;">
+
+  <div>
+    <a href="{% url 'front_page' %}" class="d-flex align-items-center mb-4 text-white text-decoration-none">
+      <img src="{% static 'images/logo1.png' %}" alt="Logo" width="40" height="40">
+      <span class="fs-5 ms-2 fw-bold">HOME</span>
+    </a>
+    <ul class="nav nav-pills flex-column">
+      <li class="nav-item mb-2">
+        <a href="#" class="nav-link active text-white">Product Demand</a>
+      </li>
+      <li class="nav-item mb-2">
+        <a href="{% url 'view_history' %}" class="nav-link text-white">History</a>
+      </li>
+    </ul>
+  </div>
+  <div class="mb-3">
+    <a href="{% url 'logout' %}" class="btn btn-outline-light w-100 mt-4">Logout</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="flex-grow-1 p-4 bg-light">
+
+  <div class="bg-primary text-white text-center py-3 px-4">
+    <h5 class="mb-0">{{ user.username }}, This Is Your Smart Ordering System Dashboard</h5>
+  </div>
+
+  <div class="container container-content text-center mt-5 pt-5">
+    <h2 class="mb-5">Product Demand</h2>
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="order-table-body">
+        <tr>
+          <td></td>
+          <td><input type="number" class="form-control" placeholder="Quantity" min="1"></td>
+          <td>
+            <button class="btn btn-sm btn-primary done-btn">Done</button>
+            <button class="btn btn-sm btn-danger delete-btn ms-1">Remove</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center gap-4 mt-3">
+      <button id="add-row-btn" class="btn btn-primary px-4 py-2">Add Product</button>
+      <button id="final-submit-btn" class="btn btn-success px-4 py-2" disabled>Final Submit</button>
+      <button id="reset-dashboard-btn" class="btn btn-danger px-4 py-2">Reset</button>
+    </div>
+
+    <div class="container mt-5" id="submitted-orders-section" style="display: none;">
+      <h4 class="mb-3">Final Submitted Product Demand</h4>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="submitted-orders-body">
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Load JS with defer -->
+<script>
+  const productOptions = ["Pant", "Shirt", "Curtain", "Towel", "T-Shirt"];
+
+  function createProductDropdown() {
+    const select = document.createElement('select');
+    select.className = 'form-select product-name';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.text = 'Select Product';
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
+
+    productOptions.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.toLowerCase();
+      option.text = product;
+      select.appendChild(option);
+    });
+
+    return select;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const firstRow = document.querySelector("#order-table-body tr td:first-child");
+    if (firstRow) firstRow.appendChild(createProductDropdown());
+  });
+</script>
+<script src="{% static 'js/user_dashboard.js' %}" defer></script>
+
+</body>
+</html>

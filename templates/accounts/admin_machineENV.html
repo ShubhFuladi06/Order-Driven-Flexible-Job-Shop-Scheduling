@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Factory Environment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+</head>
+<body class="d-flex">
+
+<!-- Sidebar -->
+<nav class="sidebar bg-dark text-white d-flex flex-column justify-content-between p-3" style="width: 220px; min-height: 100vh; position: sticky; top: 0;">
+    <div class="text-center mb-4">
+        <a href="{% url 'front_page' %}" class="text-white text-decoration-none">
+            <img src="{% static 'images/logo1.png' %}" alt="Logo" width="50" height="50" class="mb-2">
+            <h5 class="mb-0">Home</h5>
+        </a>
+    </div>
+
+    <div>
+        <a href="{% url 'admin_dashboard' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}btn-primary active{% else %}btn-outline-primary{% endif %}">User's Order</a>
+        <a href="{% url 'admin_all_orders_overview' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_all_orders_overview' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Overview</a>
+        <a href="{% url 'admin_summary' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_summary' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Summary</a>
+        <a href="{% url 'admin_machine_env' %}" class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_machine_env' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Factory Environment</a>
+        <a href="{% url 'admin_fjsp1' %}"class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_fjsp1' %}btn-primary active{% else %}btn-outline-primary{% endif %}">Flexible Scheduling</a>
+    </div>
+
+    <div class="mt-auto">
+        <a href="/admin/" class="btn btn-outline-light w-100 mt-4">Producer Administration</a>
+        <a href="{% url 'logout' %}" class="btn btn-outline-light w-100 mt-3 mb-2">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="flex-grow-1 p-4 bg-light">
+    <div class="admin-title-full text-center py-4 mb-4" style="background-color: #0d6efd; color: white; border-radius: 6px;">
+        <h2 class="m-0">Factory Environment</h2>
+        <h5 class="m-1">Machine Processing Time</h5>
+    </div>
+
+    <div class="container">
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% else %}
+            <div class="card factory-table-card">
+                <div class="table-responsive">
+                    <div class="factory-env-table-container">
+                        {{ table_html|safe}}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

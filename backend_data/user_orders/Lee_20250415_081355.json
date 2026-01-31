@@ -1,0 +1,18 @@
+[
+    {
+        "product": "towel",
+        "quantity": "12"
+    },
+    {
+        "product": "Pant",
+        "quantity": "21"
+    },
+    {
+        "product": "Shirt",
+        "quantity": "7"
+    },
+    {
+        "product": "T-shirt",
+        "quantity": "5"
+    }
+]

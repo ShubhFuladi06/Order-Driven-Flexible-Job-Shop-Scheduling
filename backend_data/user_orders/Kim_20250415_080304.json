@@ -1,0 +1,14 @@
+[
+    {
+        "product": "shirt",
+        "quantity": "15"
+    },
+    {
+        "product": "Towel",
+        "quantity": "20"
+    },
+    {
+        "product": "Pant",
+        "quantity": "15"
+    }
+]

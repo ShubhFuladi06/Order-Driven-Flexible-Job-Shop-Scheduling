@@ -1,0 +1,109 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scheduling Analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+</head>
+<body class="d-flex">
+
+<!-- Sidebar -->
+<nav class="sidebar bg-dark text-white d-flex flex-column justify-content-between p-3"
+     style="width: 220px; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1030;">
+  <div class="text-center mb-4">
+    <a href="{% url 'front_page' %}" class="text-white text-decoration-none">
+      <img src="{% static 'images/logo1.png' %}" alt="Logo" width="50" height="50" class="mb-2">
+      <h5 class="mb-0">Home</h5>
+    </a>
+  </div>
+  <div>
+    <div>
+      <!-- Sidebar Buttons -->
+      <a href="{% url 'admin_dashboard' %}"
+        class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+        User's Order
+      </a>
+
+      <a href="{% url 'admin_all_orders_overview' %}"
+        class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_all_orders_overview' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+        Overview
+      </a>
+
+      <a href="{% url 'admin_summary' %}"
+        class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_summary' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+        Summary
+      </a>
+
+      <a href="{% url 'admin_machine_env' %}"
+        class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_machine_env' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+        Factory Environment
+      </a> 
+
+      <a href="{% url 'admin_fjsp1' %}"
+        class="btn w-100 mb-2 {% if request.resolver_match.url_name == 'admin_fjsp1' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+        Flexible Scheduling
+      </a>
+    
+    </div>
+  </div>
+  <div class="mt-auto">
+    <a href="/admin/" class="btn btn-outline-light w-100 mt-4">Producer Administration</a>
+    <a href="{% url 'logout' %}" class="btn btn-outline-light w-100 mt-3 mb-2">Logout</a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="flex-grow-1 p-4 bg-light" style="margin-left: 220px;">
+  <div class="admin-title-full text-center py-4 mb-4" style="background-color: #0d6efd; color: white; border-radius: 6px;">
+    <h2 class="m-0">Order Summary</h2>
+  </div>
+
+  <!-- ✅ CENTERED CONTAINER WRAP -->
+  <div class="d-flex justify-content-center">
+    <div class="w-100" style="max-width: 1000px;">
+
+      {% if analysis %}
+        <!-- Product Demand Summary -->
+        <div class="card p-4 mt-4 shadow border-0 rounded-4">
+          <h5 class="fw-bold text-primary m-0 fs-4">📦 Product Demand Summary</h5>
+          {% if summary.product_summary %}
+            <div class="table-responsive mt-3">
+              <table class="table table-bordered table-hover table-striped align-middle shadow-sm rounded-3 overflow-hidden">
+                <thead class="table-light text-center fw-semibold" style="background-color: #f0f4ff;">
+                  <tr>
+                    <th>#</th>
+                    <th>Product Name</th>
+                    <th>Total Quantity</th>
+                  </tr>
+                </thead>
+                <tbody class="text-center">
+                  {% for product, quantity in summary.product_summary.items %}
+                  <tr>
+                    <td class="fw-bold text-muted">{{ forloop.counter }}</td>
+                    <td class="fw-medium text-capitalize">{{ product }}</td>
+                    <td>
+                      <span class="badge rounded-pill bg-gradient px-3 py-2 fs-6" style="background-color: #0d6efd;">
+                        {{ quantity }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted mt-2">No product data available.</p>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="text-muted mt-2">No product data available.</p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

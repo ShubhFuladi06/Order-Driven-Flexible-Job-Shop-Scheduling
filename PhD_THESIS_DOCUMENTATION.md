@@ -1,6 +1,5 @@
 # Flexible Job Shop Scheduling Platform: A Hybrid Metaheuristic Approach for Production Optimization
 
-## PhD Thesis Research Documentation
 
 ---
 

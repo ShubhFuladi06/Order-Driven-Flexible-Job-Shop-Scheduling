@@ -1,6 +1,6 @@
-# Research Paper: "A Hybrid Genetic Algorithm with Variable Neighborhood Search for Flexible Job Shop Scheduling: Web-Based Implementation and Performance Analysis"
+A Hybrid Genetic Algorithm with Variable Neighborhood Search for Flexible Job Shop Scheduling: Web-Based Implementation and Performance Analysis
 
-## ABSTRACT
+
 
 **Background:** The Flexible Job Shop Scheduling Problem (FJSP) represents a critical challenge in modern manufacturing systems, where operations can be processed on alternative machines, significantly expanding the solution space complexity. Traditional approaches often fail to balance solution quality with computational efficiency, limiting their practical applicability in real-time production environments.
 
@@ -59,29 +59,20 @@
 - **40% reduction** in scheduling conflicts through automated optimization
 - **60% faster** planning decisions with intuitive web interface
 
-### Economic Value
-- **Immediate ROI** through reduced production costs and improved efficiency
-- **Enhanced customer satisfaction** via improved order fulfillment rates
-- **Energy savings** through optimized machine usage patterns
-- **Reduced labor costs** via automated scheduling processes
 
-### Academic Contribution
-- **Peer-reviewed publications** in top-tier optimization journals
-- **Open-source codebase** for research community collaboration
-- **Benchmarking framework** for future FJSP algorithm evaluation
-- **Educational resource** for combinatorial optimization courses
+
 
 ---
 
 ## FUTURE RESEARCH DIRECTIONS
 
-### Short-term Extensions (6-12 months)
+### Short-term Extensions
 - **Multi-objective optimization** incorporating energy consumption and quality metrics
 - **Dynamic scheduling** capabilities for real-time disruption handling
 - **Machine learning integration** for predictive processing time estimation
 - **Cloud deployment** for scalable SaaS solution architecture
 
-### Long-term Vision (1-3 years)
+### Long-term Vision 
 - **Industry 4.0 integration** with IoT sensor data and digital twin implementation
 - **Artificial intelligence** enhancement through deep learning pattern recognition
 - **Sustainable manufacturing** focus with green scheduling optimization
@@ -89,38 +80,5 @@
 
 ---
 
-## CITATION INFORMATION
 
-**Recommended Citation:**
-[Author Name]. "A Hybrid Genetic Algorithm with Variable Neighborhood Search for Flexible Job Shop Scheduling: Web-Based Implementation and Performance Analysis." *Journal of Manufacturing Systems* (2025).
 
-**BibTeX Entry:**
-```bibtex
-@article{hybrid_fjsp_2025,
-    title={A Hybrid Genetic Algorithm with Variable Neighborhood Search for Flexible Job Shop Scheduling: Web-Based Implementation and Performance Analysis},
-    author={[Author Name]},
-    journal={Journal of Manufacturing Systems},
-    year={2025},
-    volume={XX},
-    pages={XX-XX},
-    publisher={Elsevier},
-    doi={10.1016/j.jmsy.2025.XXX}
-}
-```
-
----
-
-## REPOSITORY AND DATA AVAILABILITY
-
-**Source Code:** Available at [GitHub Repository URL]
-**Dataset:** Textile manufacturing test cases included in repository
-**Documentation:** Complete API documentation and user guides provided
-**License:** MIT License for academic and commercial use
-
-**Reproducibility:** All experiments fully reproducible with provided code and data
-**Platform Access:** Live demo available at [Demo URL]
-**Contact:** [Author Email] for collaboration and technical support
-
----
-
-*This research represents a significant advancement in flexible manufacturing scheduling, combining theoretical innovation with practical implementation to address real-world industrial challenges.*

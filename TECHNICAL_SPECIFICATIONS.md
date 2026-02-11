@@ -5,14 +5,7 @@
 ### 1.1 High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    WEB PRESENTATION LAYER                   │
-├─────────────────────────────────────────────────────────────┤
-│  HTML5/CSS3/Bootstrap │  JavaScript/D3.js  │  Responsive UI │
-├─────────────────────────────────────────────────────────────┤
-│                    APPLICATION LAYER                        │
-├─────────────────────────────────────────────────────────────┤
-│     Django Views     │    URL Routing     │   Template Engine│
+
 ├─────────────────────────────────────────────────────────────┤
 │                    BUSINESS LOGIC LAYER                     │
 ├─────────────────────────────────────────────────────────────┤
@@ -20,7 +13,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │                    OPTIMIZATION ENGINE                      │
 ├─────────────────────────────────────────────────────────────┤
-│  Hybrid GA-VNS     │    Greedy Heuristic  │   Performance    │
+│  Hybrid GA-VNS     │     Heuristic        │   Performance    │
 │   Algorithm        │      Algorithm       │    Analytics     │
 ├─────────────────────────────────────────────────────────────┤
 │                    DATA ACCESS LAYER                        │
@@ -202,85 +195,10 @@ flexible_job_shop_platform/
 └── manage.py            # Django management script
 ```
 
-### 3.2 Key Views Implementation
 
-#### Main Scheduling View
-```python
-def admin_fjsp1(request):
-    algorithm = request.GET.get('algorithm', 'greedy')
-    
-    try:
-        machine_env_file = os.path.join(settings.BASE_DIR, 'backend_data', 'factory_env', 'machineENV01.txt')
-        user_orders_folder = os.path.join(settings.BASE_DIR, 'backend_data', 'user_orders')
-        
-        if algorithm == 'hybrid':
-            from flexible_scheduling.hybrid_ga_vns_scheduler import run_hybrid_ga_vns_scheduling
-            schedule_data = run_hybrid_ga_vns_scheduling(machine_env_file, user_orders_folder)
-        else:
-            from flexible_scheduling.fjsp_scheduler import run_fjsp_scheduling
-            schedule_data = run_fjsp_scheduling(machine_env_file, user_orders_folder)
-        
-        # Format data for template
-        formatted_schedule_data = format_schedule_data_for_template(schedule_data)
-        machine_utilization = get_machine_utilization(schedule_data)
-        job_statistics = get_job_statistics(schedule_data)
-        
-        context = {
-            'schedule_data': formatted_schedule_data,
-            'machine_utilization': machine_utilization,
-            'job_statistics': job_statistics,
-            'algorithm_used': algorithm.title(),
-            'makespan': schedule_data['makespan'],
-            'total_tasks': len(schedule_data['tasks']),
-            'total_machines': len(schedule_data['machines']),
-            'order_completion_times': schedule_data.get('order_completion_times', []),
-            'completion_stats': schedule_data.get('completion_stats', {}),
-        }
-        
-        return render(request, 'accounts/admin_fjsp1.html', context)
-        
-    except Exception as e:
-        return render(request, 'accounts/admin_fjsp1.html', {'error': str(e)})
-```
-
-### 3.3 Frontend Implementation
 
 #### Gantt Chart Visualization
-```javascript
-function createGanttChart(scheduleData) {
-    const svg = d3.select("#gantt-chart")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
-    
-    const g = svg.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-    
-    // Create scales
-    const xScale = d3.scaleLinear()
-        .domain([0, d3.max(scheduleData.tasks, d => d.end_time)])
-        .range([0, width]);
-    
-    const yScale = d3.scaleBand()
-        .domain(scheduleData.machines)
-        .range([0, height])
-        .padding(0.1);
-    
-    // Draw tasks
-    g.selectAll(".task")
-        .data(scheduleData.tasks)
-        .enter()
-        .append("rect")
-        .attr("class", "task")
-        .attr("x", d => xScale(d.start_time))
-        .attr("y", d => yScale(d.machine))
-        .attr("width", d => xScale(d.end_time) - xScale(d.start_time))
-        .attr("height", yScale.bandwidth())
-        .attr("fill", d => getJobColor(d.job))
-        .on("mouseover", showTooltip)
-        .on("mouseout", hideTooltip);
-}
-```
+
 
 ## 4. DATABASE DESIGN
 
@@ -378,93 +296,3 @@ def statistical_analysis(results_list):
     return statistics
 ```
 
-## 6. SYSTEM REQUIREMENTS AND DEPLOYMENT
-
-### 6.1 Hardware Requirements
-
-**Minimum Requirements:**
-- CPU: Intel Core i5 or equivalent
-- RAM: 8GB
-- Storage: 10GB available space
-- Network: Broadband internet connection
-
-**Recommended Requirements:**
-- CPU: Intel Core i7 or equivalent
-- RAM: 16GB or higher
-- Storage: 20GB available space (SSD preferred)
-- Network: High-speed internet connection
-
-### 6.2 Software Dependencies
-
-```requirements.txt
-Django==5.1.7
-numpy==1.24.3
-python==3.11+
-sqlite3==3.x
-bootstrap==5.3.0
-d3.js==7.x
-```
-
-### 6.3 Installation Guide
-
-```bash
-# Clone repository
-git clone [repository-url]
-cd flexible-job-shop-platform
-
-# Create virtual environment
-conda create -n fjsp-platform python=3.11
-conda activate fjsp-platform
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run migrations
-python manage.py migrate
-
-# Create superuser
-python manage.py createsuperuser
-
-# Start development server
-python manage.py runserver
-```
-
-## 7. VALIDATION AND TESTING
-
-### 7.1 Algorithm Validation
-- Unit tests for individual components
-- Integration tests for complete workflow
-- Performance benchmarking against literature
-- Stress testing with large datasets
-
-### 7.2 Web Platform Testing
-- Functional testing of user interfaces
-- Cross-browser compatibility testing
-- Mobile responsiveness verification
-- Security penetration testing
-
-### 7.3 User Acceptance Testing
-- Production manager feedback sessions
-- Usability studies with domain experts
-- Performance evaluation in real environments
-- Training effectiveness assessment
-
----
-
-## CONCLUSION
-
-This technical specification provides a comprehensive foundation for PhD thesis documentation, demonstrating the depth of research, implementation excellence, and practical significance of the Flexible Job Shop Scheduling Platform. The combination of theoretical innovation and practical implementation represents a significant contribution to both academic research and industrial applications.
-
-**Research Impact:**
-- Novel hybrid metaheuristic algorithm design
-- Production-ready web platform implementation
-- Comprehensive experimental validation
-- Open-source contribution to research community
-
-**Industrial Value:**
-- Immediate deployment capability
-- Significant performance improvements
-- User-friendly interface design
-- Scalable architecture for enterprise use
-
-This documentation serves as the technical backbone for a comprehensive PhD thesis that bridges the gap between theoretical research and practical industrial applications.
